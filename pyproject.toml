@@ -1,0 +1,50 @@
+[project]
+name = "surro-sel"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mordredcommunity~=2.0.7",
+    "numpy~=2.4.2",
+    "pandas~=3.0.0",
+    "plotly~=6.5.2",
+    "rdkit~=2025.9.4",
+    "scikit-learn~=1.8.0",
+    "scipy~=1.17.0",
+    "shiny~=1.5.1",
+]
+
+[dependency-groups]
+dev = [
+  "poethepoet~=0.40.0", # task runner
+  "ruff~=0.14.13", # linter
+  "ty~=0.0.13", # type checker
+]
+
+[tool.ruff]
+line-length = 100
+lint.select = ["F", "E", "W", "I", "UP", "S", "B", "T20", "RUF"]
+lint.ignore = ["RUF012"]
+lint.unfixable = ["F401", "F841"]
+lint.isort.known-first-party = ["surro_sel"]
+
+[tool.ty]
+rules.unresolved-import = "ignore"
+
+[tool.poe.tasks]
+type = "ty check"
+
+[tool.poe.tasks.lint]
+help = "Check formatting issues"
+sequence = [
+  {cmd = "ruff format . --check"},
+  {cmd = "ruff check ."},
+]
+
+[tool.poe.tasks.format]
+help = "Fix formatting issues where possible"
+sequence = [
+  {cmd = "ruff format ."},
+  {cmd = "ruff check . --fix --show-fixes"},
+]

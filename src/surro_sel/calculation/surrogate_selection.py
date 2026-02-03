@@ -26,29 +26,26 @@ from sklearn.preprocessing import StandardScaler
 class SurrogateSelection:
     """Calculator class for chemical space surrogate selection."""
 
-
     class Strategy(StrEnum):
         """Enum for implemented surrogate selection strategies."""
+
         RANDOM = auto()
         LOWEST = auto()
         HIGHEST = auto()
         BALANCED = auto()
         HIERARCHICAL = auto()
 
-
     def __init__(self, desc):
         """Constructor for SurrogateSelection calculator class.
-        
+
         Args:
             desc: non-standardized ionization efficiency descriptor matrix
         """
 
         # Store a mean-variance standardized array of the input descriptors
-        # pylint: disable-next=C0103 # Silence lowercase variable convention
         self.X = StandardScaler().fit_transform(desc)
         # Calculate leverages for all data points
-        self.h = np.diagonal(
-            self.X.dot(np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T)))
+        self.h = np.diagonal(self.X.dot(np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T)))
 
     def _lowest_n_leverage(self, n):
         return np.argpartition(self.h, n, axis=0)[:n:]
@@ -62,19 +59,18 @@ class SurrogateSelection:
 
     def score(self, s):
         """Calculate LARD score for a set of surrogates.
-        
+
         Args:
             s: indices of selected surrogates
         Returns:
             LARD score for selected surrogates
         """
 
-        return np.dot(self.h, np.min(cdist(self.X, self.X[s]), axis=1))\
-            / self.X.shape[0]
+        return np.dot(self.h, np.min(cdist(self.X, self.X[s]), axis=1)) / self.X.shape[0]
 
     def select(self, n, strategy):
         """Select surrogates based on specified strategy and number.
-        
+
         Args:
             n: number of surrogates or fraction of dataset to select
             strategy: selection strategy to use
@@ -83,7 +79,6 @@ class SurrogateSelection:
         """
 
         # Calculate "effective" n depending on whether input is < 1
-        # pylint: disable-next=C0103 # Silence lowercase variable convention
         X_size = self.X.shape[0]
         # Ensure n is not larger than dataset size
         n_eff = min(round(n * X_size if n < 1 else n), X_size)
@@ -96,13 +91,11 @@ class SurrogateSelection:
                 surrogates = self._highest_n_leverage(n_eff)
             case self.Strategy.BALANCED:
                 n_half = int(n_eff / 2)
-                surrogates = np.concatenate([
-                    self._highest_n_leverage(n_half),
-                    self._lowest_n_leverage(n_eff - n_half)
-                ])
+                surrogates = np.concatenate(
+                    [self._highest_n_leverage(n_half), self._lowest_n_leverage(n_eff - n_half)]
+                )
             case self.Strategy.HIERARCHICAL:
-                clusters = AgglomerativeClustering(n_clusters=n_eff)\
-                    .fit_predict(self.X)
+                clusters = AgglomerativeClustering(n_clusters=n_eff).fit_predict(self.X)
                 cl_idx = [np.where(clusters == cl)[0] for cl in range(n_eff)]
                 surrogates = [idx[self._medoid(self.X[idx])] for idx in cl_idx]
             case _:

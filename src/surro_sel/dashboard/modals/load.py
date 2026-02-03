@@ -6,26 +6,21 @@ existing dataset (previously uploaded and stored as a parquet file).
 
 from shiny import module, reactive, render, ui
 
-from dashboard.utils.notifications import (
-    ValidationErrors, error_notification, load_success_notification)
-from dashboard.utils.files import load_data
+from ..utils import files, notifications
+
 
 @module.ui
-def load_modal(): # pylint: disable=C0116 # Silence missing docstring error
+def load_modal():
     return ui.modal(
-        ui.output_ui('name_select'),
-        title='Load Existing Dataset',
+        ui.output_ui("name_select"),
+        title="Load Existing Dataset",
         easy_close=False,
-        footer=[
-            ui.input_task_button('load', 'Load'),
-            ui.modal_button('Close')
-        ]
+        footer=[ui.input_task_button("load", "Load"), ui.modal_button("Close")],
     )
 
-@module.server
-# pylint: disable-next=C0116,W0622,W0613 # Silence errors from server syntax
-def load_modal_server(input, output, session, datasets, _set_data):
 
+@module.server
+def load_modal_server(input, output, session, datasets, _set_data):
     @reactive.effect
     @reactive.event(input.load)
     def load():
@@ -33,20 +28,19 @@ def load_modal_server(input, output, session, datasets, _set_data):
 
         # Show an error if button clicked without a selection
         if not input.name():
-            error_notification(ValidationErrors.NO_NAME)
-            return # Stop processing, but leave the modal open
+            notifications.error_notification(notifications.ValidationErrors.NO_NAME)
+            return  # Stop processing, but leave the modal open
 
         # Otherwise, read data files and update global app data
-        data, desc = load_data(input.name())
+        data, desc = files.load_data(input.name())
         _set_data(data, desc)
 
         # Show success notification
-        load_success_notification(data.shape[0], desc.shape[0])
+        notifications.load_success_notification(data.shape[0], desc.shape[0])
 
         # Close modal
         ui.modal_remove()
 
     @render.ui
     def name_select():
-        return ui.input_select(
-            'name', 'Dataset Name', choices=[''] + datasets())
+        return ui.input_select("name", "Dataset Name", choices=["", *datasets()])

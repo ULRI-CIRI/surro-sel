@@ -17,29 +17,36 @@ from shiny import module, req
 from shinywidgets import output_widget, render_widget
 
 # Universal plotly format parameters
-PLOTLY_TEMPLATE = 'plotly_white'
+PLOTLY_TEMPLATE = "plotly_white"
 PLOTLY_COLORS = px.colors.qualitative.Safe
 
 # Search URL for instant data point investigation (currently PubChem)
-SEARCH_URL = 'https://pubchem.ncbi.nlm.nih.gov/#query=%s'
+SEARCH_URL = "https://pubchem.ncbi.nlm.nih.gov/#query=%s"
 # Join string for searching multiple IDs (' OR ' for PubChem)
-BATCH_SEARCH_JOIN_STR = ' OR '
+BATCH_SEARCH_JOIN_STR = " OR "
+
 
 @module.ui
-# pylint: disable-next=C0116 # Silence docstring error
 def colorable_scatterplot():
-    return output_widget('plot')
+    return output_widget("plot")
+
 
 @module.server
-# pylint: disable-next=C0116,R0913,R0917 # Silence server syntax errors
 def colorable_scatterplot_server(
-    # pylint: disable-next=W0622,W0613 # Silence (more) server syntax errors
-    input, output, session, data, labels, xcol, ycol, showlog, **layout_kwargs):
-
+    input,
+    output,
+    session,
+    data,
+    labels,
+    xcol,
+    ycol,
+    showlog,
+    **layout_kwargs,
+):
     # Reusable button component for log-scale axis menus
-    def _log_menu_button(type, ax): # pylint: disable=W0622
+    def _log_menu_button(type, ax):
         """Reusable log-scale axis menu button component.
-        
+
         Args:
             type: log or linear
             ax: x or y
@@ -49,14 +56,14 @@ def colorable_scatterplot_server(
 
         return {
             # Format strings don't work here - concatenate directly
-            'label': type.capitalize() + ' ' + ax.upper() + '-axis',
-            'method': 'relayout',
-            'args': [{ax.lower() + 'axis.type': type.lower()}]
+            "label": type.capitalize() + " " + ax.upper() + "-axis",
+            "method": "relayout",
+            "args": [{ax.lower() + "axis.type": type.lower()}],
         }
 
     def _log_menu(ax):
         """Reusable log-scale axis menu component.
-        
+
         Args:
             ax: x or y
         Returns:
@@ -65,40 +72,28 @@ def colorable_scatterplot_server(
 
         # Set menu location depending on x or y axis
         loc = (
-            {
-                'y': 0,
-                'x': 1.05,
-                'yanchor': 'bottom',
-                'xanchor': 'left',
-                'direction': 'up'
-            } if ax.lower() == 'x'
-            else {
-                'y': 1.05,
-                'x': 0,
-                'yanchor':'bottom',
-                'xanchor': 'left',
-                'direction': 'down'
-            }
+            {"y": 0, "x": 1.05, "yanchor": "bottom", "xanchor": "left", "direction": "up"}
+            if ax.lower() == "x"
+            else {"y": 1.05, "x": 0, "yanchor": "bottom", "xanchor": "left", "direction": "down"}
         )
 
         # Create menu with buttons and location params
         return {
-            'showactive': True,
-            'type': 'dropdown',
-            'buttons': [
-                _log_menu_button('linear', ax), _log_menu_button('log', ax)]
+            "showactive": True,
+            "type": "dropdown",
+            "buttons": [_log_menu_button("linear", ax), _log_menu_button("log", ax)],
         } | loc
 
     def _get_event_ids(trace, points):
-        return trace['hovertext'][points.point_inds]
+        return trace["hovertext"][points.point_inds]
 
-    def _on_click(trace, points, state): # pylint: disable=W0613
+    def _on_click(trace, points, state):
         """Open search in a new tab when a data point is clicked."""
         if len(points.point_inds) == 1:
             # This is a cheat that works since we labeled points with the index
             open_new_tab(SEARCH_URL % _get_event_ids(trace, points)[0])
 
-    def _on_selection(trace, points, state): # pylint: disable=W0613
+    def _on_selection(trace, points, state):
         """Open batch search in a new tab when data points are selected."""
         if len(points.point_inds) > 0:
             ids = _get_event_ids(trace, points)
@@ -110,7 +105,7 @@ def colorable_scatterplot_server(
         req(xcol() and ycol() and not data().empty)
 
         # Show or hide log-scale axis menus
-        menus = [_log_menu('x'), _log_menu('y')] if showlog else []
+        menus = [_log_menu("x"), _log_menu("y")] if showlog else []
 
         # Build the base figure
         fig = px.scatter(
@@ -122,7 +117,7 @@ def colorable_scatterplot_server(
             # Display only, not currently functional
             hover_name=data().index,
             template=PLOTLY_TEMPLATE,
-            color_discrete_sequence=PLOTLY_COLORS
+            color_discrete_sequence=PLOTLY_COLORS,
         ).update_layout(updatemenus=menus, **layout_kwargs)
 
         # Set up the figure widget to register click handler
