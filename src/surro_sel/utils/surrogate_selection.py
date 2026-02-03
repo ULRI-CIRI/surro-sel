@@ -98,7 +98,7 @@ class SurrogateSelection:
                 clusters = AgglomerativeClustering(n_clusters=n_eff).fit_predict(self.X)
                 cl_idx = [np.where(clusters == cl)[0] for cl in range(n_eff)]
                 surrogates = [idx[self._medoid(self.X[idx])] for idx in cl_idx]
-            case _:
+            case self.Strategy.RANDOM | _:
                 # Default to random selection
                 surrogates = np.random.choice(X_size, n_eff, replace=False)
 

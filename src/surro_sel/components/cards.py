@@ -76,11 +76,10 @@ def colorable_scatterplot_server(
         """
 
         # Set menu location depending on x or y axis
-        loc = (
-            {"y": 0, "x": 1.05, "yanchor": "bottom", "xanchor": "left", "direction": "up"}
-            if ax.lower() == "x"
-            else {"y": 1.05, "x": 0, "yanchor": "bottom", "xanchor": "left", "direction": "down"}
-        )
+        if ax.lower() == "x":
+            loc = {"y": 0, "x": 1.05, "yanchor": "bottom", "xanchor": "left", "direction": "up"}
+        else:
+            loc = {"y": 1.05, "x": 0, "yanchor": "bottom", "xanchor": "left", "direction": "down"}
 
         # Create menu with buttons and location params
         return {

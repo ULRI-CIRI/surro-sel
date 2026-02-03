@@ -1,7 +1,7 @@
 """Define config and utility functions for file system interactions."""
 
-import os
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 
@@ -10,21 +10,21 @@ DATA_FILENAME = "data.parquet"
 DESC_FILENAME = "desc.parquet"
 
 # Locate data persistence folder and last updated log file
-DATA_FOLDER = "./data"
-LAST_UPDATED = os.path.join(DATA_FOLDER, "last_updated.txt")
+DATA_FOLDER = Path(__file__).parent.parent.parent / "data"
+LAST_UPDATED = DATA_FOLDER / "last_updated.txt"
 
 
 def get_datasets() -> list:
     """List available dataset names from data folder."""
-    return [f for f in os.listdir(DATA_FOLDER) if "." not in f]
+    return [p for p in DATA_FOLDER.iterdir() if p.is_dir()]
 
 
 def update_log() -> None:
     """Update last updated log file with current timestamp."""
 
     # Ensure data folder exists
-    if not os.path.exists(DATA_FOLDER):
-        os.makedirs(DATA_FOLDER, exist_ok=True)
+    if not DATA_FOLDER.exists():
+        DATA_FOLDER.mkdir(parents=True, exist_ok=True)
 
     # Write the current timestamp to the last updated file
     with open(LAST_UPDATED, "w", encoding="utf-8") as last_updated_file:
@@ -40,12 +40,11 @@ def load_data(name: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         tuple of dfs containing original data and calculated descriptors
     """
 
-    read_from_folder = os.path.join(DATA_FOLDER, name)
-
-    def read_parquet(fname: str) -> pd.DataFrame:
-        return pd.read_parquet(os.path.join(read_from_folder, fname))
-
-    return read_parquet(DATA_FILENAME), read_parquet(DESC_FILENAME)
+    read_from_folder = DATA_FOLDER / name
+    return (
+        pd.read_parquet(read_from_folder / DATA_FILENAME),
+        pd.read_parquet(read_from_folder / DESC_FILENAME),
+    )
 
 
 def save_data(name: str, data: pd.DataFrame, desc: pd.DataFrame) -> None:
@@ -58,14 +57,12 @@ def save_data(name: str, data: pd.DataFrame, desc: pd.DataFrame) -> None:
     """
 
     # Identify new data directory location and create it
-    save_to_folder = os.path.join(DATA_FOLDER, name)
+    save_to_folder = DATA_FOLDER / name
     # exist_ok = False by default, throws FileExistsError
     # This will prevent overwriting any existing dataset if validation fails
-    os.makedirs(save_to_folder)
+    save_to_folder.mkdir(parents=True)
 
-    def save_parquet(data: pd.DataFrame, fname: str) -> None:
-        data.to_parquet(os.path.join(save_to_folder, fname), index=True)
+    data.to_parquet(save_to_folder / DATA_FILENAME, index=True)
+    desc.to_parquet(save_to_folder / DESC_FILENAME, index=True)
 
-    save_parquet(data, DATA_FILENAME)
-    save_parquet(desc, DESC_FILENAME)
     update_log()  # Update the last updated log

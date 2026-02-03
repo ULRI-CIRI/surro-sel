@@ -11,7 +11,7 @@ import numpy as np
 from faicons import icon_svg
 from shiny import module, reactive, ui
 
-from surro_sel.modules import notifications
+from surro_sel.components import notifications
 from surro_sel.utils import ionization_efficiency, surrogate_selection
 
 # Surrogate selection defaults
@@ -20,6 +20,8 @@ DEFAULT_N = 0.2
 # Random simulated surrogate selection comparison parameters
 RANDOM_REPS = 100
 RANDOM_NS = [0.01, 0.1, 0.2, 0.5]
+
+type OnSurrogatesSelectedCallback = Callable[[dict, dict], None]
 
 
 @module.ui
@@ -71,7 +73,7 @@ def dashboard_sidebar_server(
     output: object,
     session: object,
     desc: reactive.Value,
-    on_surrogates_selected: Callable,
+    on_surrogates_selected: OnSurrogatesSelectedCallback,
 ) -> None:
     @reactive.calc
     def user_idx() -> np.ndarray:
@@ -192,20 +194,23 @@ def dashboard_sidebar_server(
             desc()[ionization_efficiency.IONIZATION_EFFICIENCY_EMBEDDING]
         )
         # Process automated and/or user surrogate selection
-        surr = _process_conditional(
-            include_auto := input.include_auto(),
-            selector,
-            _validate_auto,
-            _process_auto,
-            n_auto := input.n(),
-            input.strats(),
-        ) | _process_conditional(
-            include_user := input.include_user(),
-            selector,
-            _validate_user,
-            _process_user,
-            user_idx(),
-        )
+        surr = {
+            **_process_conditional(
+                include_auto := input.include_auto(),
+                selector,
+                _validate_auto,
+                _process_auto,
+                n_auto := input.n(),
+                input.strats(),
+            ),  # auto selections
+            **_process_conditional(
+                include_user := input.include_user(),
+                selector,
+                _validate_user,
+                _process_user,
+                user_idx(),
+            ),  # user selections
+        }
 
         # Proceed if selection succeeded
         if surr:
@@ -232,4 +237,4 @@ def dashboard_sidebar_server(
         ui.update_selectize("strats", selected=DEFAULT_STRATS)
         ui.update_numeric("n", value=DEFAULT_N)
         ui.update_switch("include_user", value=False)
-        ui.update_text_area("user_surr", value="")
+        ui.update_text_area("user_ids", value="")

@@ -28,7 +28,7 @@ class ValidationErrors(StrEnum):
 ERROR_MESSAGES = {
     ValidationErrors.NO_NAME: "Dataset name is required.",
     ValidationErrors.NAME_INVALID: (
-        "Invalid dataset name: must be unique, at "
+        "Invalid dataset name: must have at "
         "least two chars, no more than 32 chars, and contain only "
         "alphanumerics, underscores, dashes, and spaces."
     ),
@@ -70,7 +70,4 @@ def error_notification(key: ValidationErrors) -> None:
         key: dictionary key (from ValidationErrors enum) for error type
     """
 
-    if key in ERROR_MESSAGES:
-        _notification(ERROR_MESSAGES[key], type="error")
-    else:
-        raise ValueError(f"Error key {key} not found.")
+    _notification(ERROR_MESSAGES[key], type="error")

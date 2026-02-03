@@ -3,7 +3,7 @@
 import pandas as pd
 from shiny import App, reactive, render, req, ui
 
-from surro_sel.modules import cards, modals, sidebar
+from surro_sel.components import cards, modals, sidebar
 from surro_sel.utils import data_files
 
 # App formatting constants
@@ -82,7 +82,7 @@ def server(input: object, output: object, session: object) -> None:
         # Join all labels for each point into a single string
         return ["&".join(sorted(x)) if x else "none" for x in labels.values()]
 
-    def set_data(data_: pd.DataFrame, desc_: pd.DataFrame) -> None:
+    def on_data_loaded(data_: pd.DataFrame, desc_: pd.DataFrame) -> None:
         """Callback function to allow child modules to set global data.
 
         Args:
@@ -96,7 +96,7 @@ def server(input: object, output: object, session: object) -> None:
         desc.set(desc_)
         data.set(data_[data_.index.isin(desc_.index)])
 
-    def set_surr(surr_: dict, sim_: dict) -> None:
+    def on_surrogates_selected(surr_: dict, sim_: dict) -> None:
         """Callback function to allow child modules to set global surrogates.
 
         Args:
@@ -108,9 +108,11 @@ def server(input: object, output: object, session: object) -> None:
         sim.set(sim_)
 
     # Register server information for child modules
-    modals.load_modal_server("load_modal", datasets=datasets, on_data_loaded=set_data)
-    modals.upload_modal_server("upload_modal", datasets=datasets, on_data_loaded=set_data)
-    sidebar.dashboard_sidebar_server("sidebar", desc=desc, on_surrogates_selected=set_surr)
+    modals.load_modal_server("load_modal", datasets=datasets, on_data_loaded=on_data_loaded)
+    modals.upload_modal_server("upload_modal", datasets=datasets, on_data_loaded=on_data_loaded)
+    sidebar.dashboard_sidebar_server(
+        "sidebar", desc=desc, on_surrogates_selected=on_surrogates_selected
+    )
     cards.tsne_card_server("tsne", desc, surrogate_labels)
     cards.property_card_server("prop", data, surrogate_labels)
     cards.hist_card_server("hist", surr, sim)

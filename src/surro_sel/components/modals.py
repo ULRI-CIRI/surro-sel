@@ -8,17 +8,19 @@ This module consolidates all modal components including:
 import re
 from collections.abc import Callable
 from enum import StrEnum
-from os.path import splitext
+from pathlib import Path
 
 import pandas as pd
 from htmltools import Tag
 from shiny import module, reactive, render, ui
 
-from surro_sel.modules import notifications
+from surro_sel.components import notifications
 from surro_sel.utils import data_files, ionization_efficiency
 
 # Regular expression for dataset name character validation
 NAME_PATTERN = re.compile("[A-Za-z0-9_\\- ]{2,32}")
+
+type OnDataLoadedCallback = Callable[[pd.DataFrame, pd.DataFrame], None]
 
 
 class FileExtensions(StrEnum):
@@ -48,7 +50,7 @@ def load_modal_server(
     output: object,
     session: object,
     datasets: reactive.Value,
-    on_data_loaded: Callable,
+    on_data_loaded: OnDataLoadedCallback,
 ) -> None:
     """Server logic for loading existing dataset modal."""
 
@@ -104,7 +106,7 @@ def upload_modal_server(
     output: object,
     session: object,
     datasets: reactive.Value,
-    on_data_loaded: Callable,
+    on_data_loaded: OnDataLoadedCallback,
 ) -> None:
     """Server logic for uploading new dataset modal."""
 
@@ -125,7 +127,7 @@ def upload_modal_server(
             df of parsed file data
         """
 
-        _, ext = splitext(file["name"])
+        ext = Path(file["name"]).suffix
         content = file["datapath"]
 
         df = pd.DataFrame()
@@ -234,7 +236,7 @@ def upload_modal_server(
         try:
             # Attempt parsing file contents
             temp.set(_read_file(file[0]))
-        except (pd.errors.EmptyDataError, pd.errors.ParserError):
+        except Exception:
             # Reset temp data if parser errored out
             _clear_temp()
         finally:
