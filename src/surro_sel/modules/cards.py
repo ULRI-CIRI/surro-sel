@@ -14,6 +14,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from faicons import icon_svg
+from htmltools import Tag
 from shiny import module, reactive, render, req, ui
 from shinywidgets import output_widget, render_plotly, render_widget
 
@@ -27,11 +28,7 @@ SEARCH_URL = "https://pubchem.ncbi.nlm.nih.gov/#query=%s"
 BATCH_SEARCH_JOIN_STR = " OR "
 
 
-# ============================================================================
 # Shared Colorable Scatterplot Component
-# ============================================================================
-
-
 @module.ui
 def colorable_scatterplot() -> object:
     return output_widget("plot")
@@ -137,11 +134,7 @@ def colorable_scatterplot_server(
         return widg
 
 
-# ============================================================================
 # Report Card Component
-# ============================================================================
-
-
 @module.ui
 def report_card() -> ui.card:
     return ui.card(
@@ -168,11 +161,7 @@ def report_card_server(
         )
 
 
-# ============================================================================
 # Histogram Card Component
-# ============================================================================
-
-
 @module.ui
 def hist_card() -> ui.card:
     return ui.card(
@@ -236,11 +225,7 @@ def hist_card_server(
         return fig
 
 
-# ============================================================================
 # t-SNE Card Component
-# ============================================================================
-
-
 @module.ui
 def tsne_card() -> ui.card:
     return ui.card(
@@ -270,11 +255,7 @@ def tsne_card_server(
     )
 
 
-# ============================================================================
 # Property Comparison Card Component
-# ============================================================================
-
-
 @module.ui
 def property_card() -> ui.card:
     return ui.card(
@@ -298,17 +279,17 @@ def property_card_server(
         """Reactive calculation of numerical columns in input data."""
         return data().select_dtypes(include=np.number).columns.tolist()
 
-    def _num_cols_select(ax: str) -> ui.Select:
+    def _num_cols_select(ax: str) -> Tag:
         return ui.input_select(
             ax.lower() + "col", ax.upper() + "-axis Property", choices=num_cols()
         )
 
     @render.ui
-    def xcol_select() -> ui.Select:
+    def xcol_select() -> Tag:
         return _num_cols_select("x")
 
     @render.ui
-    def ycol_select() -> ui.Select:
+    def ycol_select() -> Tag:
         return _num_cols_select("y")
 
     colorable_scatterplot_server(

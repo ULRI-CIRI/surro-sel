@@ -5,12 +5,14 @@ automated surrogate selection or to manually select surrogates for
 comparison.
 """
 
+from collections.abc import Callable
+
 import numpy as np
 from faicons import icon_svg
 from shiny import module, reactive, ui
 
-from surro_sel.calculation import ionization_efficiency, surrogate_selection
-from surro_sel.dashboard.utils.notifications import ValidationErrors, error_notification
+from surro_sel.modules import notifications
+from surro_sel.utils import ionization_efficiency, surrogate_selection
 
 # Surrogate selection defaults
 DEFAULT_STRATS = [surrogate_selection.SurrogateSelection.Strategy.HIERARCHICAL]
@@ -69,7 +71,7 @@ def dashboard_sidebar_server(
     output: object,
     session: object,
     desc: reactive.Value,
-    on_surrogates_selected: callable,
+    on_surrogates_selected: Callable,
 ) -> None:
     @reactive.calc
     def user_idx() -> np.ndarray:
@@ -88,10 +90,10 @@ def dashboard_sidebar_server(
 
         errors = []
         if not n or n <= 0:
-            errors.append(ValidationErrors.N_INVALID)
+            errors.append(notifications.ValidationErrors.N_INVALID)
 
         if not strats:
-            errors.append(ValidationErrors.NO_STRAT)
+            errors.append(notifications.ValidationErrors.NO_STRAT)
 
         return errors
 
@@ -119,7 +121,7 @@ def dashboard_sidebar_server(
 
         errors = []
         if user_idx.size == 0:
-            errors.append(ValidationErrors.NO_USER)
+            errors.append(notifications.ValidationErrors.NO_USER)
 
         return errors
 
@@ -137,8 +139,8 @@ def dashboard_sidebar_server(
     def _process_conditional(
         switch: bool,
         selector: object,
-        _validate_fn: callable,
-        _process_fn: callable,
+        _validate_fn: Callable,
+        _process_fn: Callable,
         *args,
     ) -> dict:
         """Chain validation, error display, and processing of selection.
@@ -158,7 +160,7 @@ def dashboard_sidebar_server(
             errors = _validate_fn(*args)
             if errors:
                 for err in errors:
-                    error_notification(err)
+                    notifications.error_notification(err)
             else:
                 surr = _process_fn(selector, *args)
 
@@ -182,7 +184,7 @@ def dashboard_sidebar_server(
 
         # Check data is loaded
         if desc().empty:
-            error_notification(ValidationErrors.NO_DATA)
+            notifications.error_notification(notifications.ValidationErrors.NO_DATA)
             return  # Short-circuit with error notification if not
 
         # Initialize selector instance

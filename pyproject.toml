@@ -8,13 +8,14 @@ dependencies = [
     "faicons>=0.2.2",
     "mordredcommunity~=2.0.7",
     "numpy~=2.4.2",
+    "openpyxl~=3.1.5",
     "pandas~=3.0.0",
     "plotly~=6.5.2",
     "rdkit~=2025.9.4",
     "scikit-learn~=1.8.0",
     "scipy~=1.17.0",
     "shiny~=1.5.1",
-    "shinywidgets>=0.7.1",
+    "shinywidgets~=0.7.1",
 ]
 
 [dependency-groups]
@@ -31,8 +32,10 @@ lint.ignore = ["RUF012"]
 lint.unfixable = ["F401", "F841"]
 lint.isort.known-first-party = ["surro_sel"]
 
-[tool.ty]
-rules.unresolved-import = "ignore"
+[tool.ty.rules]
+unresolved-import = "ignore"
+unresolved-attribute = "ignore"
+call-non-callable = "ignore"
 
 [tool.poe.tasks]
 type = "ty check"

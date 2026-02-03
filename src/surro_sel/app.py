@@ -3,13 +3,14 @@
 import pandas as pd
 from shiny import App, reactive, render, req, ui
 
-from surro_sel.dashboard import cards, modals, sidebar, utils
+from surro_sel.modules import cards, modals, sidebar
+from surro_sel.utils import data_files
 
 # App formatting constants
 NAVBAR_OPTIONS = {"class": "bg-primary", "theme": "dark"}
 
 # Initialize the data folder and log file on app start
-utils.files.update_log()
+data_files.update_log()
 
 # Main application page UI
 page = ui.page_navbar(
@@ -24,8 +25,8 @@ page = ui.page_navbar(
             # If data loaded, display output content
             "!output.no_data_alert",
             ui.layout_columns(
-                cards.tsne.tsne_card("tsne"),
-                cards.property.property_card("prop"),
+                cards.tsne_card("tsne"),
+                cards.property_card("prop"),
                 max_height="50%",
             ),
         ),
@@ -38,8 +39,8 @@ page = ui.page_navbar(
             # If surrogates found, display output content
             "!output.no_surr_alert && !output.no_data_alert",
             ui.layout_columns(
-                cards.hist.hist_card("hist"),
-                cards.report.report_card("report"),
+                cards.hist_card("hist"),
+                cards.report_card("report"),
                 max_height="50%",
             ),
         ),
@@ -81,7 +82,7 @@ def server(input: object, output: object, session: object) -> None:
         # Join all labels for each point into a single string
         return ["&".join(sorted(x)) if x else "none" for x in labels.values()]
 
-    def _set_data(data_: pd.DataFrame, desc_: pd.DataFrame) -> None:
+    def set_data(data_: pd.DataFrame, desc_: pd.DataFrame) -> None:
         """Callback function to allow child modules to set global data.
 
         Args:
@@ -95,7 +96,7 @@ def server(input: object, output: object, session: object) -> None:
         desc.set(desc_)
         data.set(data_[data_.index.isin(desc_.index)])
 
-    def _set_surr(surr_: dict, sim_: dict) -> None:
+    def set_surr(surr_: dict, sim_: dict) -> None:
         """Callback function to allow child modules to set global surrogates.
 
         Args:
@@ -107,40 +108,40 @@ def server(input: object, output: object, session: object) -> None:
         sim.set(sim_)
 
     # Register server information for child modules
-    modals.load.load_modal_server("load_modal", datasets=datasets, on_data_loaded=_set_data)
-    modals.upload.upload_modal_server("upload_modal", datasets=datasets, on_data_loaded=_set_data)
-    sidebar.dashboard_sidebar_server("sidebar", desc=desc, on_surrogates_selected=_set_surr)
-    cards.tsne.tsne_card_server("tsne", desc, surrogate_labels)
-    cards.property.property_card_server("prop", data, surrogate_labels)
-    cards.hist.hist_card_server("hist", surr, sim)
-    cards.report.report_card_server("report", desc, surr)
+    modals.load_modal_server("load_modal", datasets=datasets, on_data_loaded=set_data)
+    modals.upload_modal_server("upload_modal", datasets=datasets, on_data_loaded=set_data)
+    sidebar.dashboard_sidebar_server("sidebar", desc=desc, on_surrogates_selected=set_surr)
+    cards.tsne_card_server("tsne", desc, surrogate_labels)
+    cards.property_card_server("prop", data, surrogate_labels)
+    cards.hist_card_server("hist", surr, sim)
+    cards.report_card_server("report", desc, surr)
 
     @reactive.effect
-    @reactive.file_reader(utils.files.LAST_UPDATED)
+    @reactive.file_reader(data_files.LAST_UPDATED)
     def update_datasets() -> None:
         """Reactively update available datasets on log file change."""
-        datasets.set(utils.files.get_datasets())
+        datasets.set(data_files.get_datasets())
 
     @reactive.effect
     @reactive.event(input.load)
     def show_load_modal() -> None:
         """Show load modal on button click."""
-        ui.modal_show(modals.load.load_modal("load_modal"))
+        ui.modal_show(modals.load_modal("load_modal"))
 
     @reactive.effect
     @reactive.event(input.upload)
     def show_upload_modal() -> None:
         """Show upload modal on button click."""
-        ui.modal_show(modals.upload.upload_modal("upload_modal"))
+        ui.modal_show(modals.upload_modal("upload_modal"))
 
     @render.ui
-    def no_data_alert() -> ui.Card:
+    def no_data_alert() -> ui.card:
         """Display an alert in place of content if no data has been loaded."""
         req(data().empty)
         return ui.card("No data found. Load data to begin.", fill=False)
 
     @render.ui
-    def no_surr_alert() -> ui.Card:
+    def no_surr_alert() -> ui.card:
         """Display an alert in place of content if no surrogates found."""
         req(not surr())
         return ui.card("No surrogates found. Run surrogate selection to see results.", fill=False)

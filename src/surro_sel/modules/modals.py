@@ -6,14 +6,16 @@ This module consolidates all modal components including:
 """
 
 import re
+from collections.abc import Callable
 from enum import StrEnum
 from os.path import splitext
 
 import pandas as pd
+from htmltools import Tag
 from shiny import module, reactive, render, ui
 
-from surro_sel.calculation.ionization_efficiency import calculate_ionization_efficiency
-from surro_sel.dashboard.utils import files, notifications
+from surro_sel.modules import notifications
+from surro_sel.utils import data_files, ionization_efficiency
 
 # Regular expression for dataset name character validation
 NAME_PATTERN = re.compile("[A-Za-z0-9_\\- ]{2,32}")
@@ -29,11 +31,7 @@ class FileExtensions(StrEnum):
     TXT = ".txt"
 
 
-# ============================================================================
 # Load Modal Component
-# ============================================================================
-
-
 @module.ui
 def load_modal() -> ui.modal:
     return ui.modal(
@@ -50,7 +48,7 @@ def load_modal_server(
     output: object,
     session: object,
     datasets: reactive.Value,
-    on_data_loaded: callable,
+    on_data_loaded: Callable,
 ) -> None:
     """Server logic for loading existing dataset modal."""
 
@@ -65,7 +63,7 @@ def load_modal_server(
             return  # Stop processing, but leave the modal open
 
         # Otherwise, read data files and update global app data
-        data, desc = files.load_data(input.name())
+        data, desc = data_files.load_data(input.name())
         on_data_loaded(data, desc)
 
         # Show success notification
@@ -75,15 +73,11 @@ def load_modal_server(
         ui.modal_remove()
 
     @render.ui
-    def name_select() -> ui.Select:
+    def name_select() -> Tag:
         return ui.input_select("name", "Dataset Name", choices=["", *datasets()])
 
 
-# ============================================================================
 # Upload Modal Component
-# ============================================================================
-
-
 @module.ui
 def upload_modal() -> ui.modal:
     return ui.modal(
@@ -110,7 +104,7 @@ def upload_modal_server(
     output: object,
     session: object,
     datasets: reactive.Value,
-    on_data_loaded: callable,
+    on_data_loaded: Callable,
 ) -> None:
     """Server logic for uploading new dataset modal."""
 
@@ -280,10 +274,10 @@ def upload_modal_server(
 
         # Process data and calculate descriptors
         data = _process_data(temp(), id_col, qrs_col, input.ignore_cols())
-        desc = calculate_ionization_efficiency(data[qrs_col], data.index)
+        desc = ionization_efficiency.calculate_ionization_efficiency(data[qrs_col], data.index)
 
         # Save data frames as parquet files
-        files.save_data(name, data, desc)
+        data_files.save_data(name, data, desc)
 
         # Use callback to update global app data
         on_data_loaded(data, desc)
