@@ -24,8 +24,8 @@ page = ui.page_navbar(
             # If data loaded, display output content
             "!output.no_data_alert",
             ui.layout_columns(
-                cards.tsne_card("tsne"),
-                cards.property_card("prop"),
+                cards.tsne.tsne_card("tsne"),
+                cards.property.property_card("prop"),
                 max_height="50%",
             ),
         ),
@@ -38,8 +38,8 @@ page = ui.page_navbar(
             # If surrogates found, display output content
             "!output.no_surr_alert && !output.no_data_alert",
             ui.layout_columns(
-                cards.hist_card("hist"),
-                cards.report_card("report"),
+                cards.hist.hist_card("hist"),
+                cards.report.report_card("report"),
                 max_height="50%",
             ),
         ),
@@ -107,13 +107,13 @@ def server(input: object, output: object, session: object) -> None:
         sim.set(sim_)
 
     # Register server information for child modules
-    modals.load_modal_server("load_modal", datasets=datasets, on_data_loaded=_set_data)
-    modals.upload_modal_server("upload_modal", datasets=datasets, on_data_loaded=_set_data)
+    modals.load.load_modal_server("load_modal", datasets=datasets, on_data_loaded=_set_data)
+    modals.upload.upload_modal_server("upload_modal", datasets=datasets, on_data_loaded=_set_data)
     sidebar.dashboard_sidebar_server("sidebar", desc=desc, on_surrogates_selected=_set_surr)
-    cards.tsne_card_server("tsne", desc, surrogate_labels)
-    cards.property_card_server("prop", data, surrogate_labels)
-    cards.hist_card_server("hist", surr, sim)
-    cards.report_card_server("report", desc, surr)
+    cards.tsne.tsne_card_server("tsne", desc, surrogate_labels)
+    cards.property.property_card_server("prop", data, surrogate_labels)
+    cards.hist.hist_card_server("hist", surr, sim)
+    cards.report.report_card_server("report", desc, surr)
 
     @reactive.effect
     @reactive.file_reader(utils.files.LAST_UPDATED)
@@ -125,13 +125,13 @@ def server(input: object, output: object, session: object) -> None:
     @reactive.event(input.load)
     def show_load_modal() -> None:
         """Show load modal on button click."""
-        ui.modal_show(modals.load_modal("load_modal"))
+        ui.modal_show(modals.load.load_modal("load_modal"))
 
     @reactive.effect
     @reactive.event(input.upload)
     def show_upload_modal() -> None:
         """Show upload modal on button click."""
-        ui.modal_show(modals.upload_modal("upload_modal"))
+        ui.modal_show(modals.upload.upload_modal("upload_modal"))
 
     @render.ui
     def no_data_alert() -> ui.Card:

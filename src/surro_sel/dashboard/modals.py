@@ -1,8 +1,8 @@
-"""Modal containing new data upload functionality.
+"""Modal UI components for data management.
 
-This module contains definitions for a modal allowing users to upload a new
-data set from a CSV file and store both original data and calculated
-ionization efficiency descriptors as parquet files.
+This module consolidates all modal components including:
+- load_modal: Load existing dataset from storage
+- upload_modal: Upload and process new dataset
 """
 
 import re
@@ -10,10 +10,10 @@ from enum import StrEnum
 from os.path import splitext
 
 import pandas as pd
-from calculation.ionization_efficiency import calculate_ionization_efficiency
-from shiny import module, reactive, ui
+from shiny import module, reactive, render, ui
 
-from ..utils import files, notifications
+from surro_sel.calculation.ionization_efficiency import calculate_ionization_efficiency
+from surro_sel.dashboard.utils import files, notifications
 
 # Regular expression for dataset name character validation
 NAME_PATTERN = re.compile("[A-Za-z0-9_\\- ]{2,32}")
@@ -29,8 +29,63 @@ class FileExtensions(StrEnum):
     TXT = ".txt"
 
 
+# ============================================================================
+# Load Modal Component
+# ============================================================================
+
+
 @module.ui
-def upload_modal():
+def load_modal() -> ui.modal:
+    return ui.modal(
+        ui.output_ui("name_select"),
+        title="Load Existing Dataset",
+        easy_close=False,
+        footer=[ui.input_task_button("load", "Load"), ui.modal_button("Close")],
+    )
+
+
+@module.server
+def load_modal_server(
+    input: object,
+    output: object,
+    session: object,
+    datasets: reactive.Value,
+    on_data_loaded: callable,
+) -> None:
+    """Server logic for loading existing dataset modal."""
+
+    @reactive.effect
+    @reactive.event(input.load)
+    def load() -> None:
+        """Perform data load on button click."""
+
+        # Show an error if button clicked without a selection
+        if not input.name():
+            notifications.error_notification(notifications.ValidationErrors.NO_NAME)
+            return  # Stop processing, but leave the modal open
+
+        # Otherwise, read data files and update global app data
+        data, desc = files.load_data(input.name())
+        on_data_loaded(data, desc)
+
+        # Show success notification
+        notifications.load_success_notification(data.shape[0], desc.shape[0])
+
+        # Close modal
+        ui.modal_remove()
+
+    @render.ui
+    def name_select() -> ui.Select:
+        return ui.input_select("name", "Dataset Name", choices=["", *datasets()])
+
+
+# ============================================================================
+# Upload Modal Component
+# ============================================================================
+
+
+@module.ui
+def upload_modal() -> ui.modal:
     return ui.modal(
         ui.tooltip(
             ui.input_text("name", "Name"),
@@ -50,16 +105,24 @@ def upload_modal():
 
 
 @module.server
-def upload_modal_server(input, output, session, datasets, _set_data):
+def upload_modal_server(
+    input: object,
+    output: object,
+    session: object,
+    datasets: reactive.Value,
+    on_data_loaded: callable,
+) -> None:
+    """Server logic for uploading new dataset modal."""
+
     # Reactive value to hold temporary data loaded from the file input,
     # used to populate selectors before processing & persisting the data
     temp = reactive.value(pd.DataFrame())
 
-    def _clear_temp():
+    def _clear_temp() -> None:
         """Reset temp reactive to an empty data frame."""
         temp.set(pd.DataFrame())
 
-    def _read_file(file):
+    def _read_file(file: dict) -> pd.DataFrame:
         """Read a pandas df from a variety of tabular data formats.
 
         Args:
@@ -85,7 +148,7 @@ def upload_modal_server(input, output, session, datasets, _set_data):
 
         return df
 
-    def _validate_name(name):
+    def _validate_name(name: str) -> list:
         """Validate user input dataset name.
 
         Based on the current name conditions, no more than one error will
@@ -111,7 +174,7 @@ def upload_modal_server(input, output, session, datasets, _set_data):
 
         return errors
 
-    def _validate_data(data, id_col, qrs_col):
+    def _validate_data(data: pd.DataFrame, id_col: str, qrs_col: str) -> list:
         """Validate user input data and column selections.
 
         Based on the current conditions, no more than one error will
@@ -136,7 +199,9 @@ def upload_modal_server(input, output, session, datasets, _set_data):
 
         return errors
 
-    def _process_data(data, id_col, qrs_col, ignore_cols):
+    def _process_data(
+        data: pd.DataFrame, id_col: str, qrs_col: str, ignore_cols: list
+    ) -> pd.DataFrame:
         """Process user uploaded data according to column selections.
 
         Args:
@@ -155,14 +220,14 @@ def upload_modal_server(input, output, session, datasets, _set_data):
             .drop(columns=[col for col in ignore_cols if not col == qrs_col])
         )
 
-    def _clear_and_close():
+    def _clear_and_close() -> None:
         """Clear entered data and close the modal."""
         _clear_temp()
         ui.modal_remove()
 
     @reactive.effect
     @reactive.event(input.file)
-    def upload_temp():
+    def upload_temp() -> None:
         """Read the uploaded file into the temp reactive when input changes."""
 
         # Check if user has provided a file
@@ -185,7 +250,7 @@ def upload_modal_server(input, output, session, datasets, _set_data):
 
     @reactive.effect()
     @reactive.event(temp)
-    def update_select():
+    def update_select() -> None:
         """Update select inputs with columns from temp when it changes."""
 
         # Get available columns from temp data (or empty list if temp is empty)
@@ -198,7 +263,7 @@ def upload_modal_server(input, output, session, datasets, _set_data):
 
     @reactive.effect
     @reactive.event(input.upload)
-    def upload():
+    def upload() -> None:
         """Perform data validation and final upload on upload button click."""
 
         # Check for dataset name validation errors
@@ -221,7 +286,7 @@ def upload_modal_server(input, output, session, datasets, _set_data):
         files.save_data(name, data, desc)
 
         # Use callback to update global app data
-        _set_data(data, desc)
+        on_data_loaded(data, desc)
 
         # Show success notification, clear temp data, and close modal
         notifications.load_success_notification(data.shape[0], desc.shape[0])
@@ -229,6 +294,6 @@ def upload_modal_server(input, output, session, datasets, _set_data):
 
     @reactive.effect
     @reactive.event(input.close)
-    def close():
+    def close() -> None:
         """Clear temp data and close modal on close button click."""
         _clear_and_close()

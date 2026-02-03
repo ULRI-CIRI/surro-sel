@@ -14,12 +14,12 @@ DATA_FOLDER = "./data"
 LAST_UPDATED = os.path.join(DATA_FOLDER, "last_updated.txt")
 
 
-def get_datasets():
+def get_datasets() -> list:
     """List available dataset names from data folder."""
     return [f for f in os.listdir(DATA_FOLDER) if "." not in f]
 
 
-def update_log():
+def update_log() -> None:
     """Update last updated log file with current timestamp."""
 
     # Ensure data folder exists
@@ -31,7 +31,7 @@ def update_log():
         last_updated_file.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
-def load_data(name):
+def load_data(name: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Read data and descriptor files from a specified data directory.
 
     Args:
@@ -42,13 +42,13 @@ def load_data(name):
 
     read_from_folder = os.path.join(DATA_FOLDER, name)
 
-    def read_parquet(fname):
+    def read_parquet(fname: str) -> pd.DataFrame:
         return pd.read_parquet(os.path.join(read_from_folder, fname))
 
     return read_parquet(DATA_FILENAME), read_parquet(DESC_FILENAME)
 
 
-def save_data(name, data, desc):
+def save_data(name: str, data: pd.DataFrame, desc: pd.DataFrame) -> None:
     """Save data and descriptor files to a specified data directory.
 
     Args:
@@ -63,7 +63,7 @@ def save_data(name, data, desc):
     # This will prevent overwriting any existing dataset if validation fails
     os.makedirs(save_to_folder)
 
-    def save_parquet(data, fname):
+    def save_parquet(data: pd.DataFrame, fname: str) -> None:
         data.to_parquet(os.path.join(save_to_folder, fname), index=True)
 
     save_parquet(data, DATA_FILENAME)

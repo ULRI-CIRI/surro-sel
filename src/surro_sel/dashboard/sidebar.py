@@ -6,11 +6,11 @@ comparison.
 """
 
 import numpy as np
-from dashboard.utils.notifications import ValidationErrors, error_notification
 from faicons import icon_svg
 from shiny import module, reactive, ui
 
-from ..calculation import ionization_efficiency, surrogate_selection
+from surro_sel.calculation import ionization_efficiency, surrogate_selection
+from surro_sel.dashboard.utils.notifications import ValidationErrors, error_notification
 
 # Surrogate selection defaults
 DEFAULT_STRATS = [surrogate_selection.SurrogateSelection.Strategy.HIERARCHICAL]
@@ -21,8 +21,7 @@ RANDOM_NS = [0.01, 0.1, 0.2, 0.5]
 
 
 @module.ui
-# pylint: disable-next=C0116 # Silence missing docstring error
-def dashboard_sidebar():
+def dashboard_sidebar() -> ui.Sidebar:
     return ui.sidebar(
         ui.input_switch("include_auto", "Include auto selected surrogates?", True),
         ui.panel_conditional(
@@ -65,14 +64,19 @@ def dashboard_sidebar():
 
 
 @module.server
-# pylint: disable-next=C0116,W0613,W0622 # Silence server syntax errors
-def dashboard_sidebar_server(input, output, session, desc, _set_surr):
+def dashboard_sidebar_server(
+    input: object,
+    output: object,
+    session: object,
+    desc: reactive.Value,
+    on_surrogates_selected: callable,
+) -> None:
     @reactive.calc
-    def user_idx():
+    def user_idx() -> np.ndarray:
         """Reactively process user entered surrogate IDs to list of indices."""
         return np.where(np.isin(desc().index, input.user_ids().splitlines()))[0]
 
-    def _validate_auto(n, strats):
+    def _validate_auto(n: float, strats: list) -> list:
         """Validate inputs to automated surrogate selection.
 
         Args:
@@ -91,7 +95,7 @@ def dashboard_sidebar_server(input, output, session, desc, _set_surr):
 
         return errors
 
-    def _process_auto(selector, n, strats):
+    def _process_auto(selector: object, n: float, strats: list) -> dict:
         """Process automated surrogate selection with user inputs.
 
         Args:
@@ -104,7 +108,7 @@ def dashboard_sidebar_server(input, output, session, desc, _set_surr):
 
         return {strat: selector.select(n=n, strategy=strat) for strat in strats}
 
-    def _validate_user(user_idx):
+    def _validate_user(user_idx: np.ndarray) -> list:
         """Validate inputs to manual user surrogate selection.
 
         Args:
@@ -119,7 +123,7 @@ def dashboard_sidebar_server(input, output, session, desc, _set_surr):
 
         return errors
 
-    def _process_user(selector, user_idx):
+    def _process_user(selector: object, user_idx: np.ndarray) -> dict:
         """Process manual user surrogate selection with user inputs.
 
         Args:
@@ -130,7 +134,13 @@ def dashboard_sidebar_server(input, output, session, desc, _set_surr):
 
         return {"user": (user_idx, selector.score(user_idx))}
 
-    def _process_conditional(switch, selector, _validate_fn, _process_fn, *args):
+    def _process_conditional(
+        switch: bool,
+        selector: object,
+        _validate_fn: callable,
+        _process_fn: callable,
+        *args,
+    ) -> dict:
         """Chain validation, error display, and processing of selection.
 
         Args:
@@ -154,7 +164,7 @@ def dashboard_sidebar_server(input, output, session, desc, _set_surr):
 
         return surr
 
-    def _simulate_random(selector, ns):
+    def _simulate_random(selector: object, ns: list) -> dict:
         scores = []
         for n in ns:
             scores.extend(
@@ -167,7 +177,7 @@ def dashboard_sidebar_server(input, output, session, desc, _set_surr):
 
     @reactive.effect
     @reactive.event(input.select)
-    def select():
+    def select() -> None:
         """Perform surrogate selection on click."""
 
         # Check data is loaded
@@ -210,11 +220,11 @@ def dashboard_sidebar_server(input, output, session, desc, _set_surr):
             sim = _simulate_random(selector, sorted(unique_int_ns))
 
             # Update global surrogate selection data using callback
-            _set_surr(surr, sim)
+            on_surrogates_selected(surr, sim)
 
     @reactive.effect
     @reactive.event(desc)
-    def clear():
+    def clear() -> None:
         """Clear surrogate selection inputs when dataset changes."""
         ui.update_switch("include_auto", value=True)
         ui.update_selectize("strats", selected=DEFAULT_STRATS)

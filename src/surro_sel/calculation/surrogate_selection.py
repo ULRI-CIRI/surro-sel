@@ -35,7 +35,7 @@ class SurrogateSelection:
         BALANCED = auto()
         HIERARCHICAL = auto()
 
-    def __init__(self, desc):
+    def __init__(self, desc: np.ndarray) -> None:
         """Constructor for SurrogateSelection calculator class.
 
         Args:
@@ -47,17 +47,17 @@ class SurrogateSelection:
         # Calculate leverages for all data points
         self.h = np.diagonal(self.X.dot(np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T)))
 
-    def _lowest_n_leverage(self, n):
+    def _lowest_n_leverage(self, n: int) -> np.ndarray:
         return np.argpartition(self.h, n, axis=0)[:n:]
 
-    def _highest_n_leverage(self, n):
+    def _highest_n_leverage(self, n: int) -> np.ndarray:
         return np.argpartition(self.h, -n, axis=0)[-n::]
 
     @staticmethod
-    def _medoid(x):
+    def _medoid(x: np.ndarray) -> int:
         return np.argmin(cdist(x, np.mean(x, axis=0).reshape(1, -1)))
 
-    def score(self, s):
+    def score(self, s: np.ndarray) -> float:
         """Calculate LARD score for a set of surrogates.
 
         Args:
@@ -68,7 +68,7 @@ class SurrogateSelection:
 
         return np.dot(self.h, np.min(cdist(self.X, self.X[s]), axis=1)) / self.X.shape[0]
 
-    def select(self, n, strategy):
+    def select(self, n: float, strategy: "SurrogateSelection.Strategy") -> tuple[np.ndarray, float]:
         """Select surrogates based on specified strategy and number.
 
         Args:

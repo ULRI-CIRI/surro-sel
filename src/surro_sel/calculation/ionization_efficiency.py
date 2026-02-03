@@ -45,7 +45,9 @@ _desc_calculator = Calculator(
 _tsne_pipeline = make_pipeline(StandardScaler(), TSNE(random_state=2025))
 
 
-def calculate_ionization_efficiency(smiles, index, with_tsne=True):
+def calculate_ionization_efficiency(
+    smiles: pd.Series, index: pd.Index, with_tsne: bool = True
+) -> pd.DataFrame:
     """Calculate descriptors and optional TSNE embedding for structures.
 
     Args:
