@@ -1,9 +1,8 @@
 """Parent module for qNTA SurroSel app."""
 
-import pandas as pd
 from shiny import App, reactive, render, req, ui
 
-from surro_sel.components import cards, modals, sidebar
+from surro_sel.components import cards, data_store, modals, sidebar
 from surro_sel.utils import data_files
 
 # App formatting constants
@@ -57,73 +56,30 @@ page = ui.page_navbar(
 
 # Main application page server
 def server(input: object, output: object, session: object) -> None:
+    # Central app state store
+    store = data_store.DataStore()
     # Reactive value for list of available loaded dataset names
     datasets = reactive.value([])
-    # Original data and calculated descriptors for current dataset
-    data = reactive.value(pd.DataFrame())
-    desc = reactive.value(pd.DataFrame())
-    # Real surrogate selection data
-    surr = reactive.value({})
-    # Simulated random comparison surrogate selection data
-    sim = reactive.value({})
 
-    @reactive.calc
-    def surrogate_labels() -> list:
-        """Reactively convert surrogate selection data to data point labels."""
-
-        # Initialize an empty list of labels for each point
-        labels = {i: [] for i in range(desc().shape[0])}
-        for strat, (idx, _) in surr().items():
-            # For each in the included surrogate selection strategies...
-            for i in idx:
-                # ...add to the labels of all points selected by that strategy
-                labels[i].append(strat)
-
-        # Join all labels for each point into a single string
-        return ["&".join(sorted(x)) if x else "none" for x in labels.values()]
-
-    def on_data_loaded(data_: pd.DataFrame, desc_: pd.DataFrame) -> None:
-        """Callback function to allow child modules to set global data.
-
-        Args:
-            data_: df containing new data
-            desc_: df containing calculated descriptors
-        """
-
-        surr.set({})  # Any time data is changed, surrogates should reset
-        sim.set({})
-
-        desc.set(desc_)
-        data.set(data_[data_.index.isin(desc_.index)])
-
-    def on_surrogates_selected(surr_: dict, sim_: dict) -> None:
-        """Callback function to allow child modules to set global surrogates.
-
-        Args:
-            surr_: dict of new surrogate selection results
-            sim_: dict of new simulated surrogate selection comparison
-        """
-
-        surr.set(surr_)
-        sim.set(sim_)
-
-    # Register server information for child modules
-    modals.load_modal_server("load_modal", datasets=datasets, on_data_loaded=on_data_loaded)
-    modals.upload_modal_server("upload_modal", datasets=datasets, on_data_loaded=on_data_loaded)
+    # Register child modules
+    modals.load_modal_server("load_modal", datasets=datasets, on_data_loaded=store.update_data)
+    modals.upload_modal_server("upload_modal", datasets=datasets, on_data_loaded=store.update_data)
     sidebar.dashboard_sidebar_server(
-        "sidebar", desc=desc, on_surrogates_selected=on_surrogates_selected
+        "sidebar", desc=store.desc, on_surrogates_selected=store.update_surrogates
     )
-    cards.tsne_card_server("tsne", desc, surrogate_labels)
-    cards.property_card_server("prop", data, surrogate_labels)
-    cards.hist_card_server("hist", surr, sim)
-    cards.report_card_server("report", desc, surr)
+    cards.tsne_card_server("tsne", store.desc, store.surrogate_labels)
+    cards.property_card_server("prop", store.data, store.surrogate_labels)
+    cards.hist_card_server("hist", store.surr, store.sim)
+    cards.report_card_server("report", store.desc, store.surr)
 
+    # File system monitoring
     @reactive.effect
     @reactive.file_reader(data_files.LAST_UPDATED)
     def update_datasets() -> None:
         """Reactively update available datasets on log file change."""
         datasets.set(data_files.get_datasets())
 
+    # Modal show handlers
     @reactive.effect
     @reactive.event(input.load)
     def show_load_modal() -> None:
@@ -136,16 +92,29 @@ def server(input: object, output: object, session: object) -> None:
         """Show upload modal on button click."""
         ui.modal_show(modals.upload_modal("upload_modal"))
 
+    # Reactive state queries for conditionals
+    # These must directly access reactive values to establish proper dependencies
+    @reactive.calc
+    def data_ready() -> bool:
+        """Reactive computation of data loaded state."""
+        return not store.desc().empty
+
+    @reactive.calc
+    def surrogates_ready() -> bool:
+        """Reactive computation of surrogate selected state."""
+        return bool(store.surr())
+
+    # Conditional UI panel rendering
     @render.ui
     def no_data_alert() -> ui.card:
         """Display an alert in place of content if no data has been loaded."""
-        req(data().empty)
+        req(not data_ready())
         return ui.card("No data found. Load data to begin.", fill=False)
 
     @render.ui
     def no_surr_alert() -> ui.card:
         """Display an alert in place of content if no surrogates found."""
-        req(not surr())
+        req(not surrogates_ready())
         return ui.card("No surrogates found. Run surrogate selection to see results.", fill=False)
 
 

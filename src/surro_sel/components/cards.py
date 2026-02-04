@@ -28,7 +28,7 @@ SEARCH_URL = "https://pubchem.ncbi.nlm.nih.gov/#query={}"
 BATCH_SEARCH_JOIN_STR = " OR "
 
 
-# Shared Colorable Scatterplot Component
+# %% Shared colorable scatterplot component %%
 @module.ui
 def colorable_scatterplot() -> object:
     return output_widget("plot")
@@ -132,7 +132,7 @@ def colorable_scatterplot_server(
         return widg
 
 
-# Report Card Component
+# %% Text report card %%
 @module.ui
 def report_card() -> ui.card:
     return ui.card(
@@ -159,7 +159,7 @@ def report_card_server(
         )
 
 
-# Histogram Card Component
+# %% LARD score histogram plot card %%
 @module.ui
 def hist_card() -> ui.card:
     return ui.card(
@@ -223,7 +223,7 @@ def hist_card_server(
         return fig
 
 
-# t-SNE Card Component
+# %% t-SNE scatterplot card %%
 @module.ui
 def tsne_card() -> ui.card:
     return ui.card(
@@ -253,7 +253,7 @@ def tsne_card_server(
     )
 
 
-# Property Comparison Card Component
+# %% Property comparison scatterplot card %%
 @module.ui
 def property_card() -> ui.card:
     return ui.card(

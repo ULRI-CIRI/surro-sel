@@ -33,7 +33,7 @@ class FileExtensions(StrEnum):
     TXT = ".txt"
 
 
-# Load Modal Component
+# %% Existing data load modal %%
 @module.ui
 def load_modal() -> ui.modal:
     return ui.modal(
@@ -79,7 +79,7 @@ def load_modal_server(
         return ui.input_select("name", "Dataset Name", choices=["", *datasets()])
 
 
-# Upload Modal Component
+# %% New data upload modal %%
 @module.ui
 def upload_modal() -> ui.modal:
     return ui.modal(
