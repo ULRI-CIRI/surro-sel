@@ -5,13 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "faicons>=0.2.2",
+    "faicons~=0.2.2",
     "mordredcommunity~=2.0.7",
     "numpy~=2.4.2",
     "openpyxl~=3.1.5",
     "pandas~=3.0.0",
     "plotly~=6.5.2",
-    "pyarrow>=23.0.0",
+    "pyarrow~=23.0.0",
     "rdkit~=2025.9.4",
     "scikit-learn~=1.8.0",
     "scipy~=1.17.0",
@@ -22,6 +22,7 @@ dependencies = [
 [dependency-groups]
 dev = [
   "poethepoet~=0.40.0", # task runner
+  "rsconnect-python~=1.28.2", # Posit integration
   "ruff~=0.14.13", # linter
   "ty~=0.0.13", # type checker
 ]
