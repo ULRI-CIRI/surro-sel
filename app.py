@@ -45,6 +45,9 @@ page = ui.page_navbar(
         ),
     ),
     ui.nav_spacer(),
+    ui.nav_control(
+        ui.tooltip(ui.input_action_button("test_btn", "Did GitHub/Posit CI/CD work?"), "Yep!")
+    ),
     ui.nav_control(ui.input_action_button("load", "Load Existing Data")),
     ui.nav_control(ui.input_action_button("upload", "Upload New Data")),
     title="qNTA SurroSel",

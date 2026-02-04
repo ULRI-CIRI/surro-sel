@@ -14,6 +14,10 @@ click==8.3.1
     # via
     #   shiny
     #   uvicorn
+colorama==0.4.6
+    # via
+    #   click
+    #   ipython
 comm==0.2.3
     # via ipywidgets
 decorator==5.2.1
@@ -91,8 +95,6 @@ pandas==3.0.0
     # via surro-sel (pyproject.toml)
 parso==0.8.5
     # via jedi
-pexpect==4.9.0
-    # via ipython
 pillow==12.1.0
     # via rdkit
 platformdirs==4.5.1
@@ -108,8 +110,6 @@ prompt-toolkit==3.0.52
     #   shiny
 psygnal==0.15.1
     # via anywidget
-ptyprocess==0.7.0
-    # via pexpect
 pure-eval==0.2.3
     # via stack-data
 pyarrow==23.0.0
@@ -168,6 +168,8 @@ typing-extensions==4.15.0
     #   anywidget
     #   htmltools
     #   shiny
+tzdata==2025.3
+    # via pandas
 uc-micro-py==1.0.3
     # via linkify-it-py
 uvicorn==0.40.0
