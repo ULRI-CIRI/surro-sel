@@ -1,0 +1,77 @@
+name: CI - Format, Type Check, and Generate Manifests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better diffs
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          version: "latest"
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      
+      - name: Install dependencies with uv
+        working-directory: surro-sel
+        run: |
+          uv sync --frozen
+          uv pip compile pyproject.toml -o requirements.txt
+      
+      - name: Run format check (ruff)
+        working-directory: surro-sel
+        run: uv run poe format
+      
+      - name: Run type check (ty)
+        working-directory: surro-sel
+        run: uv run poe type
+      
+      - name: Generate manifest.json
+        working-directory: surro-sel
+        run: |
+          # Generate manifest using rsconnect-python
+          uv run rsconnect write-manifest shiny ./ --overwrite
+      
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet HEAD surro-sel/requirements.txt surro-sel/manifest.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Commit and push changes (on push)
+        if: github.event_name == 'push' && steps.changes.outputs.changed == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add surro-sel/requirements.txt surro-sel/manifest.json
+          git commit -m "ci: regenerate requirements.txt and manifest.json"
+          git push
+      
+      - name: Report changes (on PR)
+        if: github.event_name == 'pull_request' && steps.changes.outputs.changed == 'true'
+        run: |
+          echo "⚠️ requirements.txt or manifest.json have changed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Please regenerate these files locally with:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "cd surro-sel" >> $GITHUB_STEP_SUMMARY
+          echo "uv pip compile pyproject.toml -o requirements.txt" >> $GITHUB_STEP_SUMMARY
+          echo "uv run rsconnect write-manifest shiny ./ --overwrite" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
