@@ -55,9 +55,9 @@ class SurrogateSelection:
 
     @staticmethod
     def _medoid(x: np.ndarray) -> int:
-        return np.argmin(cdist(x, np.mean(x, axis=0).reshape(1, -1)))
+        return int(np.argmin(cdist(x, np.mean(x, axis=0).reshape(1, -1))))
 
-    def score(self, s: np.ndarray) -> float:
+    def score(self, s: np.ndarray | list) -> float:
         """Calculate LARD score for a set of surrogates.
 
         Args:
@@ -68,7 +68,9 @@ class SurrogateSelection:
 
         return np.dot(self.h, np.min(cdist(self.X, self.X[s]), axis=1)) / self.X.shape[0]
 
-    def select(self, n: float, strategy: "SurrogateSelection.Strategy") -> tuple[np.ndarray, float]:
+    def select(
+        self, n: float, strategy: "SurrogateSelection.Strategy"
+    ) -> tuple[np.ndarray | list, float]:
         """Select surrogates based on specified strategy and number.
 
         Args:

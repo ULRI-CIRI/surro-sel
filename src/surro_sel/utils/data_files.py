@@ -16,7 +16,7 @@ LAST_UPDATED = DATA_FOLDER / "last_updated.txt"
 
 def get_datasets() -> list:
     """List available dataset names from data folder."""
-    return [p for p in DATA_FOLDER.iterdir() if p.is_dir()]
+    return sorted([p.name for p in DATA_FOLDER.iterdir() if p.is_dir()])
 
 
 def update_log() -> None:
@@ -40,10 +40,9 @@ def load_data(name: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         tuple of dfs containing original data and calculated descriptors
     """
 
-    read_from_folder = DATA_FOLDER / name
     return (
-        pd.read_parquet(read_from_folder / DATA_FILENAME),
-        pd.read_parquet(read_from_folder / DESC_FILENAME),
+        pd.read_parquet(DATA_FOLDER / name / DATA_FILENAME),
+        pd.read_parquet(DATA_FOLDER / name / DESC_FILENAME),
     )
 
 

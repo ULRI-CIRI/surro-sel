@@ -23,7 +23,7 @@ PLOTLY_TEMPLATE = "plotly_white"
 PLOTLY_COLORS = px.colors.qualitative.Safe
 
 # Search URL for instant data point investigation (currently PubChem)
-SEARCH_URL = "https://pubchem.ncbi.nlm.nih.gov/#query=%s"
+SEARCH_URL = "https://pubchem.ncbi.nlm.nih.gov/#query={}"
 # Join string for searching multiple IDs (' OR ' for PubChem)
 BATCH_SEARCH_JOIN_STR = " OR "
 
@@ -60,7 +60,6 @@ def colorable_scatterplot_server(
         """
 
         return {
-            # Format strings don't work here - concatenate directly
             "label": f"{type.capitalize()} {ax.upper()}-axis",
             "method": "relayout",
             "args": [{f"{ax.lower()}axis.type": type.lower()}],
@@ -91,17 +90,17 @@ def colorable_scatterplot_server(
     def _get_event_ids(trace: dict, points: object) -> list:
         return trace["hovertext"][points.point_inds]
 
-    def _on_click(trace: dict, points: object, state: object) -> None:
+    def on_click(trace: dict, points: object, state: object) -> None:
         """Open search in a new tab when a data point is clicked."""
         if len(points.point_inds) == 1:
             # This is a cheat that works since we labeled points with the index
-            open_new_tab(SEARCH_URL % _get_event_ids(trace, points)[0])
+            open_new_tab(SEARCH_URL.format(_get_event_ids(trace, points)[0]))
 
-    def _on_selection(trace: dict, points: object, state: object) -> None:
+    def on_selection(trace: dict, points: object, state: object) -> None:
         """Open batch search in a new tab when data points are selected."""
         if len(points.point_inds) > 0:
             ids = _get_event_ids(trace, points)
-            open_new_tab(SEARCH_URL % BATCH_SEARCH_JOIN_STR.join(ids))
+            open_new_tab(SEARCH_URL.format(BATCH_SEARCH_JOIN_STR.join(ids)))
 
     @render_widget
     def plot() -> object:
@@ -127,8 +126,8 @@ def colorable_scatterplot_server(
         # Set up the figure widget to register click handler
         widg = go.FigureWidget(fig.data, fig.layout)
         for tr in widg.data:
-            tr.on_click(_on_click)
-            tr.on_selection(_on_selection)
+            tr.on_click(on_click)
+            tr.on_selection(on_selection)
 
         return widg
 
