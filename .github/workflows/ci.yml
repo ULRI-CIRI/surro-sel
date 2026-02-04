@@ -26,13 +26,13 @@ jobs:
         with:
           python-version: "3.13"
       
-      - name: Install dependencies with uv
+      - name: Install dependencies and generate requirements.txt
         run: |
           uv sync --frozen
           uv pip compile pyproject.toml -o requirements.txt
       
       - name: Run format check (ruff)
-        run: uv run poe format
+        run: uv run poe lint
       
       - name: Run type check (ty)
         run: uv run poe type
