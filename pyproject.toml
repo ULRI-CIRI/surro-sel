@@ -55,3 +55,10 @@ sequence = [
   {cmd = "ruff format ."},
   {cmd = "ruff check . --fix --show-fixes"},
 ]
+
+[tool.poe.tasks.prep]
+help = "Prepare requirements.txt and manifest.json files using uv"
+sequence = [
+  {cmd = "uv pip compile pyproject.toml -o requirements.txt"},
+  {cmd = "uv run rsconnect write-manifest shiny ./ --overwrite"}
+]

@@ -104,7 +104,7 @@
       "checksum": "0a98eccb9da487abe3209a94a4f9d284"
     },
     "pyproject.toml": {
-      "checksum": "2960217ffc6d5a53ef009819726db5e2"
+      "checksum": "49f683f9c3e8f86e14d131080d25b4ec"
     },
     "utils/__init__.py": {
       "checksum": "d41d8cd98f00b204e9800998ecf8427e"
@@ -131,7 +131,7 @@
       "checksum": "77744086333215a53cbc5bd658233321"
     },
     "uv.lock": {
-      "checksum": "ff634ff427baf40d94bf32b8848c7de5"
+      "checksum": "2e180608f9ac5a70d58ab462b9e7df60"
     }
   }
 }
