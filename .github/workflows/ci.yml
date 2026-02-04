@@ -27,21 +27,17 @@ jobs:
           python-version: "3.13"
       
       - name: Install dependencies with uv
-        working-directory: surro-sel
         run: |
           uv sync --frozen
           uv pip compile pyproject.toml -o requirements.txt
       
       - name: Run format check (ruff)
-        working-directory: surro-sel
         run: uv run poe format
       
       - name: Run type check (ty)
-        working-directory: surro-sel
         run: uv run poe type
       
       - name: Generate manifest.json
-        working-directory: surro-sel
         run: |
           # Generate manifest using rsconnect-python
           uv run rsconnect write-manifest shiny ./ --overwrite
