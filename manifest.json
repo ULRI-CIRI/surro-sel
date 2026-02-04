@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "locale": "English_United States.1252",
+  "locale": "C.UTF-8",
   "metadata": {
     "appmode": "python-shiny",
     "entrypoint": "app"
   },
   "python": {
-    "version": "3.13.0",
+    "version": "3.13.11",
     "package_manager": {
       "name": "pip",
       "version": "26.0",
@@ -20,88 +20,55 @@
   },
   "files": {
     "requirements.txt": {
-      "checksum": "95426142590ed370dc3fa846d8626a39"
+      "checksum": "04c4374fe103f560d99ac337b69e5f94"
+    },
+    ".github/workflows/ci.yml": {
+      "checksum": "7cb5744b46eb8acd4a28103038f12e5e"
     },
     ".gitignore": {
-      "checksum": "9b6528398aa2f85e773f1af6b13ecb77"
+      "checksum": "0e10fb70354bc52e4af3cf4f2d015856"
     },
     ".ruff_cache/.gitignore": {
       "checksum": "07813ad49b7c958916325086d422ca91"
     },
-    ".ruff_cache/0.14.14/14778029806061516171": {
-      "checksum": "2e376e0a757ca981c77a907dc37ee130"
+    ".ruff_cache/0.14.14/11668733209252935574": {
+      "checksum": "14826f2211d508ebb4663be91b871092"
     },
-    ".ruff_cache/0.14.14/8789561235203665837": {
-      "checksum": "ef2f3201e1abdd9cb60ee98792bf4c2b"
+    ".ruff_cache/0.14.14/13312955878833379859": {
+      "checksum": "2b481faf0f9299829aa14c74f2e0090b"
+    },
+    ".ruff_cache/0.14.14/8143407716168628091": {
+      "checksum": "40ddeea589dca3a58254acebd3c53fae"
     },
     ".ruff_cache/CACHEDIR.TAG": {
       "checksum": "4b50dc490ca121c935cec9c15273aa95"
     },
     "LICENSE": {
-      "checksum": "a0114fa61a6355118449e4fee1201977"
+      "checksum": "0922af6392963d45a6e4c7eee8627733"
     },
     "README.md": {
-      "checksum": "940ec20dcdd751c0495108b1581d2cd5"
+      "checksum": "9fbaf831115d1d6059148b4f9609f03d"
     },
     "app.py": {
-      "checksum": "12027b4f45e46afa2655ba28f3a8d595"
+      "checksum": "1d9a1eae1db5f8e73c48c84e92e4a4ef"
     },
     "components/__init__.py": {
       "checksum": "d41d8cd98f00b204e9800998ecf8427e"
     },
-    "components/__pycache__/__init__.cpython-313.pyc": {
-      "checksum": "58011cba1024ea41f8f9272d860fe7b3"
-    },
-    "components/__pycache__/app.cpython-313.pyc": {
-      "checksum": "8fb8807eaaa044c1bb38ca092b2a85ee"
-    },
-    "components/__pycache__/cards.cpython-313.pyc": {
-      "checksum": "d735e1f5252ce2e2669280a583fe91e4"
-    },
-    "components/__pycache__/data_store.cpython-313.pyc": {
-      "checksum": "fc7608d8e343a1e4ecf5d18bc5c49fa2"
-    },
-    "components/__pycache__/files.cpython-313.pyc": {
-      "checksum": "11a8596517770d43d563c4992354b8b3"
-    },
-    "components/__pycache__/modals.cpython-313.pyc": {
-      "checksum": "4336695b6a6f570ee133a3a8460cd9b1"
-    },
-    "components/__pycache__/notifications.cpython-313.pyc": {
-      "checksum": "9ee107b60369d8bb4b966fb5dc200037"
-    },
-    "components/__pycache__/sidebar.cpython-313.pyc": {
-      "checksum": "b06a8b2ac9b82293c0b7f217efff0bc7"
-    },
     "components/cards.py": {
-      "checksum": "adc5f094aeb965fb2d6eaa4b2e0d79ef"
+      "checksum": "87282745c18a58e83488c63792896752"
     },
     "components/data_store.py": {
-      "checksum": "ea194431043a4c18358f2ef732e16232"
+      "checksum": "3de5ba7a86ab0f09d17a03462bd831b8"
     },
     "components/modals.py": {
-      "checksum": "1a7ef53f357a07e8c87e88370aa2bc1c"
+      "checksum": "4788a7543ad15512fbbdafe8cc6dfa0f"
     },
     "components/notifications.py": {
-      "checksum": "4eca4079f98c8133574bb01dc453bc93"
+      "checksum": "524a9d0581aab0e5a4b224c20a46320b"
     },
     "components/sidebar.py": {
-      "checksum": "8c0ba7a69eb75542d42a161510f2e77c"
-    },
-    "data/last_updated.txt": {
-      "checksum": "d2ddc7799cb9df9bbb2108c821732f1b"
-    },
-    "data/prodwater_test2/data.parquet": {
-      "checksum": "52bdab276baf35ad8a8224a65e6b9e6d"
-    },
-    "data/prodwater_test2/desc.parquet": {
-      "checksum": "8e8e6b013c56c65c815df4315e7339ba"
-    },
-    "data/prodwater_test/data.parquet": {
-      "checksum": "d1c6ce5827e9cc2ed69dbc0398d4aa85"
-    },
-    "data/prodwater_test/desc.parquet": {
-      "checksum": "0a98eccb9da487abe3209a94a4f9d284"
+      "checksum": "9eab20f7dcf64795415e793c2865f1d8"
     },
     "pyproject.toml": {
       "checksum": "49f683f9c3e8f86e14d131080d25b4ec"
@@ -109,26 +76,14 @@
     "utils/__init__.py": {
       "checksum": "d41d8cd98f00b204e9800998ecf8427e"
     },
-    "utils/__pycache__/__init__.cpython-313.pyc": {
-      "checksum": "8dd399917783204c00aca408631afd85"
-    },
-    "utils/__pycache__/data_files.cpython-313.pyc": {
-      "checksum": "de9a0c6b752d9e06e1d52b62a455099a"
-    },
-    "utils/__pycache__/ionization_efficiency.cpython-313.pyc": {
-      "checksum": "711d20d6fd0e32654198d4900989a540"
-    },
-    "utils/__pycache__/surrogate_selection.cpython-313.pyc": {
-      "checksum": "5727a7d0041223f68566a94945aa4447"
-    },
     "utils/data_files.py": {
-      "checksum": "ebaa0b7e59dbe9c34e2fc5efa4cb95ef"
+      "checksum": "38d496805f68fc5a1f59813fe0b11361"
     },
     "utils/ionization_efficiency.py": {
-      "checksum": "a86d693b46f6c5af40043fdfcc50827b"
+      "checksum": "b6ee8f9ca8b393a6910e04cbd22c45c5"
     },
     "utils/surrogate_selection.py": {
-      "checksum": "77744086333215a53cbc5bd658233321"
+      "checksum": "fd9a086fbd260918c50bcc268f87e3d2"
     },
     "uv.lock": {
       "checksum": "2e180608f9ac5a70d58ab462b9e7df60"
