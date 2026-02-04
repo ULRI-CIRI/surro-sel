@@ -23,7 +23,7 @@
       "checksum": "04c4374fe103f560d99ac337b69e5f94"
     },
     ".github/workflows/ci.yml": {
-      "checksum": "7cb5744b46eb8acd4a28103038f12e5e"
+      "checksum": "7d0218265273e77c9f399f1de39d8ff7"
     },
     ".gitignore": {
       "checksum": "0e10fb70354bc52e4af3cf4f2d015856"
@@ -32,13 +32,13 @@
       "checksum": "07813ad49b7c958916325086d422ca91"
     },
     ".ruff_cache/0.14.14/11668733209252935574": {
-      "checksum": "1b76f0618e8711109172c50b853f364c"
+      "checksum": "f00ffd9bf3f20d203b813a7a87cf7d23"
     },
     ".ruff_cache/0.14.14/13312955878833379859": {
-      "checksum": "64b13f45b66dc97f212bc6263f730e41"
+      "checksum": "645737234d0b8c592e3806d972a17de7"
     },
     ".ruff_cache/0.14.14/8143407716168628091": {
-      "checksum": "b0051856185b2aa3f7678c7bf6c1a4ff"
+      "checksum": "d149729c31257f1acb6594d93d569cd2"
     },
     ".ruff_cache/CACHEDIR.TAG": {
       "checksum": "4b50dc490ca121c935cec9c15273aa95"
