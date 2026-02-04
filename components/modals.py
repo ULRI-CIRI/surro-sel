@@ -14,8 +14,8 @@ import pandas as pd
 from htmltools import Tag
 from shiny import module, reactive, render, ui
 
-from surro_sel.components import notifications
-from surro_sel.utils import data_files, ionization_efficiency
+from components import notifications
+from utils import data_files, ionization_efficiency
 
 # Regular expression for dataset name character validation
 NAME_PATTERN = re.compile("[A-Za-z0-9_\\- ]{2,32}")

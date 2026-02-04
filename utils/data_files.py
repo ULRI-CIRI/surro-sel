@@ -10,7 +10,7 @@ DATA_FILENAME = "data.parquet"
 DESC_FILENAME = "desc.parquet"
 
 # Locate data persistence folder and last updated log file
-DATA_FOLDER = Path(__file__).parent.parent.parent / "data"
+DATA_FOLDER = Path(__file__).parent.parent / "data"
 LAST_UPDATED = DATA_FOLDER / "last_updated.txt"
 
 

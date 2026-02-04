@@ -2,8 +2,8 @@
 
 from shiny import App, reactive, render, req, ui
 
-from surro_sel.components import cards, data_store, modals, sidebar
-from surro_sel.utils import data_files
+from components import cards, data_store, modals, sidebar
+from utils import data_files
 
 # App formatting constants
 NAVBAR_OPTIONS = {"class": "bg-primary", "theme": "dark"}

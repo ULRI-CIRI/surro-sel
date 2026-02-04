@@ -11,8 +11,8 @@ import numpy as np
 from faicons import icon_svg
 from shiny import module, reactive, ui
 
-from surro_sel.components import notifications
-from surro_sel.utils import ionization_efficiency, surrogate_selection
+from components import notifications
+from utils import ionization_efficiency, surrogate_selection
 
 # Surrogate selection defaults
 DEFAULT_STRATS = [surrogate_selection.SurrogateSelection.Strategy.HIERARCHICAL]
