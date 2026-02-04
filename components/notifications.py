@@ -47,7 +47,7 @@ ERROR_MESSAGES = {
 }
 
 
-def _notification(message: str, type: str = DEFAULT_TYPE) -> None:
+def _notification(message: str, type: str = DEFAULT_TYPE) -> int:
     # Generic notification function with a specified type and default duration
     notification_show(message, type=type, duration=DEFAULT_DURATION)
 
